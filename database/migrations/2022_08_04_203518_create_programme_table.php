@@ -13,7 +13,7 @@ class CreateProgrammeTable extends Migration
      */
     public function up()
     {
-        Schema::create('programme', function (Blueprint $table) {
+        Schema::create('programmes', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')
@@ -21,10 +21,10 @@ class CreateProgrammeTable extends Migration
                 ->on('users')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
-                $table->unsignedBigInteger('activite_id');
+            $table->unsignedBigInteger('activite_id');
             $table->foreign('activite_id')
                 ->references('id')
-                ->on('activite')
+                ->on('activites')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
             $table->date('date');

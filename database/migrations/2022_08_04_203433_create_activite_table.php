@@ -13,7 +13,7 @@ class CreateActiviteTable extends Migration
      */
     public function up()
     {
-        Schema::create('activite', function (Blueprint $table) {
+        Schema::create('activites', function (Blueprint $table) {
             $table->id();
             $table->string('libelleactivite');
             $table->timestamps();

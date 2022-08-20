@@ -22,7 +22,7 @@ class CreateUsersTable extends Migration
             $table->unsignedBigInteger('role_id');
             $table->foreign('role_id')
                 ->references('id')
-                ->on('role')
+                ->on('roles')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
             $table->string('numero');

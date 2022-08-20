@@ -11,23 +11,17 @@ class LoginRegistController extends Controller
 {
     //Creation d'un utilisateur
     public function registerUser(Request $req){
-        // $error= "Verification negatif";
-        // $verif_email = DB::table('users')->where('email',$req->email)->get();
-        // $res = json_decode($verif_email,true);
-        // return response()->json(sizeof($res));
-        // if(sizeof($res) === 0)
-        // {
-        // $user= User::create($req->all());
-        // return response()->json($user,200);
-        // }
-        // else
-        // {
-        //     return response()->json($error, 200);
-        // }
 
-        $user= User::create($req->all());
-        return response()->json($user,200);
+        $result = DB::table('users')->where([['email', $req->email],])->get();
 
+        $res = json_decode($result,true);
+        if(sizeof($res) === 0){
+            $user= User::create($req->all());
+            return response()->json($user,200);
+        }
+        else{
+            return response()->json(sizeof($res));
+        }
     }
 
     //Connexion

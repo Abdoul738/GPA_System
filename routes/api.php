@@ -35,8 +35,9 @@ Route::get('images/{filename}', function ($filename)
     return response($file, 200)->header('Content-Type', 'image/jpeg');
 });
 
-Route::post('/createrole',[RoleController::class,'storeRole']);
+Route::post('/createrole',[RoleController::class,'createRole']);
 Route::post('/createactivite',[ProgramController::class,'createactivite']);
+Route::post('/createprogramme',[ProgramController::class,'createprogramme']);
 
 Route::get('/getactivites',[ProgramController::class,'getactivite']);
 Route::get('/getroles',[RoleController::class,'getrole']);

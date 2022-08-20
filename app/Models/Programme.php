@@ -16,8 +16,8 @@ class Programme extends Model
      */
     //public $timestamps=false;
     protected $fillable = [
-        'userid',
-        'activiteid',
+        'user_id',
+        'activite_id',
         'date',
         'statut',
     ];

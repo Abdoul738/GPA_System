@@ -14,26 +14,24 @@ class ProgramController extends Controller
     // GESTION DES ACTIVITES
 
     public function createactivite(Request $req){
-        // $error=0;
-        // $verif_activite = DB::table('activite')->where('libelleactivite',$req->libelleactivite)->get();
-        // $res = json_decode($verif_activite,true);
-        // return response()->json(sizeof($res));
-        // if(sizeof($res) === 0)
-        // {
-        // $activite= Activite::create($req->all());
-        // return response()->json($activite,200);
-        // }
-        // else
-        // {
-        //     return response()->json($error, 200);
-        // }
+        $error=0;
+        $verif_activite = DB::table('activites')->where('libelleactivite',$req->libelleactivite)->get();
+        $res = json_decode($verif_activite,true);
+        if(sizeof($res) === 0)
+        {
         $activite= Activite::create($req->all());
-        return response()->json($activite,200);
+        return response()->json($activite->id);
+        }
+        else
+        {
+            // return response()->json($error, 200);
+            return response()->json($verif_activite[0]->id);
+        }
     }
 
     public function verifactivite(Request $req){
         $error=0;
-        $verif_activite = DB::table('activite')->where('libelleactivite',$req->libelleactivite)->get();
+        $verif_activite = DB::table('activites')->where('libelleactivite',$req->libelleactivite)->get();
         $res = json_decode($verif_activite,true);
         return response()->json(sizeof($res));
         if(sizeof($res) === 0)
@@ -49,7 +47,7 @@ class ProgramController extends Controller
     }
 
     public function getactivite(){
-        $activites = DB::table('activite')->get();
+        $activites = DB::table('activites')->get();
         return response()->json($activites,200);
     }
 
@@ -63,7 +61,7 @@ class ProgramController extends Controller
     }
 
     public function getprogramme(){
-        $programmes = DB::table('programme')->get();
+        $programmes = DB::table('programmes')->get();
         return response()->json($programmes,200);
     }
 
@@ -98,6 +96,7 @@ class ProgramController extends Controller
             // même mois
             $retour = "du ".strftime("%d", $timeStart)." au ".strftime("%d %B %Y", $timeEnd);
         }
-        return $retour;
+        // return $retour;
+        return response()->json($retour,200);
     }
 }
