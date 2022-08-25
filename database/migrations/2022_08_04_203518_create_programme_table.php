@@ -15,6 +15,12 @@ class CreateProgrammeTable extends Migration
     {
         Schema::create('programmes', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('titre_id');
+            $table->foreign('titre_id')
+                ->references('id')
+                ->on('titre_programmes')
+                ->onDelete('restrict')
+                ->onUpdate('restrict');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')
                 ->references('id')

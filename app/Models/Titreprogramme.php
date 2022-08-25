@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Programme extends Model
+class Titreprogramme extends Model
 {
     use HasFactory;
-
     /**
      * The attributes that are mass assignable.
      *
@@ -16,10 +15,6 @@ class Programme extends Model
      */
     //public $timestamps=false;
     protected $fillable = [
-        'titre_id',
-        'user_id',
-        'activite_id',
-        'date',
-        'statut',
+        'titreprogramme',
     ];
 }

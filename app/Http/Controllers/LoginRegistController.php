@@ -62,9 +62,17 @@ class LoginRegistController extends Controller
 
     //Liste des utilisateurs
     public function getAllUser(){
-    //   $data= User::all();
         $data = DB::table('users')->get();
-        return response()->json($data,200);
+        // return response()->json($data,200);
+
+        $users = User::join('roles', 'users.role_id', '=', 'roles.id')
+            ->get(['users.*', 'roles.libellerole']);
+        return response()->json($users,200);
+
+        // $users = User::join('roles', 'users.role_id', '=', 'roles.id')
+        //     ->where('users.status', 'active')
+        //     ->where('posts.status','active')
+        //     ->get(['users.*', 'roles.libellerole']);
       }
 
     //Modifier Profile
@@ -76,5 +84,31 @@ class LoginRegistController extends Controller
     public function RecupPassword(){
         
     }
+
+    // public function updateUser(Request $request,$id){
+    //     $user=User::find($id);
+    //     $user->update($request->all());
+    //     return $user;
+    // }
+
+    public function updateUser(Request $req){
+        $user=User::where('id',$req->id)
+        ->update(
+            [ 
+                'nom' => $req->nom,
+                'prenom' => $req->prenom,
+                'email' => $req->email,
+                'role_id' => $req->role_id,
+                'numero' => $req->numero
+            ]
+        );
+
+        return response()->json($user);
+    }
+
+    public function delUser($id){
+        return User::destroy($id);
+    }
+
 
 }

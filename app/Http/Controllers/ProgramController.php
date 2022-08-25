@@ -6,13 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Programme;
 use App\Models\Activite;
+use App\Models\Titreprogramme;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
 class ProgramController extends Controller
 {
-    // GESTION DES ACTIVITES
-
+    /*********************** START GESTION DES ACTIVITES *******************/
     public function createactivite(Request $req){
         $error=0;
         $verif_activite = DB::table('activites')->where('libelleactivite',$req->libelleactivite)->get();
@@ -24,25 +24,7 @@ class ProgramController extends Controller
         }
         else
         {
-            // return response()->json($error, 200);
             return response()->json($verif_activite[0]->id);
-        }
-    }
-
-    public function verifactivite(Request $req){
-        $error=0;
-        $verif_activite = DB::table('activites')->where('libelleactivite',$req->libelleactivite)->get();
-        $res = json_decode($verif_activite,true);
-        return response()->json(sizeof($res));
-        if(sizeof($res) === 0)
-        {
-        $activite= Activite::create($req->all());
-        return response()->json($activite->id,200);
-        }
-        else
-        {
-            $activiteid= $verif_activite->id;
-            return response()->json($activiteid,200);
         }
     }
 
@@ -50,10 +32,9 @@ class ProgramController extends Controller
         $activites = DB::table('activites')->get();
         return response()->json($activites,200);
     }
+    /*********************** END GESTION DES ACTIVITES *******************/
 
-
-    // GESTION DES PROGRAMMES
-
+    /*********************** START GESTION DES PROGRAMMES *******************/
     public function createprogramme(Request $req){
 
         $programme= Programme::create($req->all());
@@ -64,17 +45,16 @@ class ProgramController extends Controller
         $programmes = DB::table('programmes')->get();
         return response()->json($programmes,200);
     }
+    /*********************** END GESTION DES PROGRAMMES *******************/
 
-    /**
-     * Retourne une semaine sous forme de chaine "du {lundi} au {dimanche}..." en gérant des cas particuliers :
-     *  - début et fin pas dans le même mois
-     *  - début et fin pas dans la même année
-     * !!! Penser à utiliser setlocale pour avoir la date (jour et mois) en Français !!!
-     */
+    /*********************** START GESTION DES TITRES DE PROGRAMMES *******************/
     function getweek(){
         setlocale(LC_TIME, 'fr_FR.UTF8');
         $annee = date("Y");
         $no_semaine = date("W");
+        if(date("w")>=6){
+            $no_semaine = date("W")+1;
+        }
         // Récup jour début et fin de la semaine
         $timeStart = strtotime("First Monday January {$annee} + ".($no_semaine - 1)." Week");
         $timeEnd   = strtotime("First Monday January {$annee} + {$no_semaine} Week -1 day");
@@ -94,9 +74,25 @@ class ProgramController extends Controller
             $retour = "du ".strftime("%d %B", $timeStart)." au ".strftime("%d %B %Y", $timeEnd);
         } else {
             // même mois
-            $retour = "du ".strftime("%d", $timeStart)." au ".strftime("%d %B %Y", $timeEnd);
+            $retour = "PROGRAMME DE LA SEMAINE : ".strftime("%d", $timeStart)." au ".strftime("%d %B %Y", $timeEnd);
         }
         // return $retour;
         return response()->json($retour,200);
     }
+
+    public function createtitreprogramme(Request $req){
+        $error=0;
+        $verif_programme = DB::table('titreprogrammes')->where('titreprogramme',$req->titreprogramme)->get();
+        $res = json_decode($verif_programme,true);
+        if(sizeof($res) === 0)
+        {
+        $titreprogramme= Titreprogramme::create($req->all());
+        return response()->json($titreprogramme->id);
+        }
+        else
+        {
+            return response()->json($verif_programme[0]->id);
+        }
+    }
+    /*********************** END GESTION DES TITRES DE PROGRAMMES *******************/
 }

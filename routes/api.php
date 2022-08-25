@@ -37,8 +37,12 @@ Route::get('images/{filename}', function ($filename)
 
 Route::post('/createrole',[RoleController::class,'createRole']);
 Route::post('/createactivite',[ProgramController::class,'createactivite']);
+Route::post('/createtitreprogramme',[ProgramController::class,'createtitreprogramme']);
 Route::post('/createprogramme',[ProgramController::class,'createprogramme']);
 
+Route::post('/updateuser',[LoginRegistController::class,'updateUser']);
+
+Route::get('/deluser/{id}',[LoginRegistController::class,'delUser']);
 Route::get('/getactivites',[ProgramController::class,'getactivite']);
 Route::get('/getroles',[RoleController::class,'getrole']);
 Route::get('/getweek',[ProgramController::class,'getweek']);
