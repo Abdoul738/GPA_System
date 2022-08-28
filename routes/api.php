@@ -47,3 +47,8 @@ Route::get('/getactivites',[ProgramController::class,'getactivite']);
 Route::get('/getroles',[RoleController::class,'getrole']);
 Route::get('/getweek',[ProgramController::class,'getweek']);
 Route::get('/getallusers',[LoginRegistController::class,'getAllUser']);
+Route::get('/getallprogramme',[ProgramController::class,'getAllTitreprogramme']);
+Route::get('/getactnbr/{id}',[ProgramController::class,'getActNbrByUser']);
+Route::get('/getprogramprogres/{id}',[ProgramController::class,'getProgrammeProgress']);
+Route::get('/getprogramgroupuser/{id}',[ProgramController::class,'getprogrammeByUser']);
+Route::get('/getactualprogram',[ProgramController::class,'getprogramme']);

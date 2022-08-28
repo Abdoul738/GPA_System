@@ -16,6 +16,7 @@ class TitreProgrammesTable extends Migration
         Schema::create('titreprogrammes', function (Blueprint $table) {
             $table->id();
             $table->string('titreprogramme');
+            $table->Number('progress');
             $table->timestamps();
         });
     }

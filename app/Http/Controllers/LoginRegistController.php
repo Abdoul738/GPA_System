@@ -85,12 +85,6 @@ class LoginRegistController extends Controller
         
     }
 
-    // public function updateUser(Request $request,$id){
-    //     $user=User::find($id);
-    //     $user->update($request->all());
-    //     return $user;
-    // }
-
     public function updateUser(Request $req){
         $user=User::where('id',$req->id)
         ->update(

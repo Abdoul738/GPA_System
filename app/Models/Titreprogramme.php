@@ -16,5 +16,6 @@ class Titreprogramme extends Model
     //public $timestamps=false;
     protected $fillable = [
         'titreprogramme',
+        'progress',
     ];
 }
