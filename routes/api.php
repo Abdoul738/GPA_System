@@ -24,31 +24,32 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 //other
 
-Route::get('/getuserbyemail/{email}',[LoginRegistController::class,'getUser']);
-Route::post('/registerUser',[LoginRegistController::class,'registerUser']);
-Route::post('/login',[LoginRegistController::class,'login']);
-Route::get('/getuserbyid/{id}',[LoginRegistController::class,'getuserbyid']);
-
 Route::get('images/{filename}', function ($filename)
 {
     $file = \Illuminate\Support\Facades\Storage::get($filename);
     return response($file, 200)->header('Content-Type', 'image/jpeg');
 });
 
+Route::post('/registerUser',[LoginRegistController::class,'registerUser']);
+Route::post('/login',[LoginRegistController::class,'login']);
 Route::post('/createrole',[RoleController::class,'createRole']);
 Route::post('/createactivite',[ProgramController::class,'createactivite']);
 Route::post('/createtitreprogramme',[ProgramController::class,'createtitreprogramme']);
 Route::post('/createprogramme',[ProgramController::class,'createprogramme']);
-
 Route::post('/updateuser',[LoginRegistController::class,'updateUser']);
 
+Route::get('/getuserbyemail/{email}',[LoginRegistController::class,'getUser']);
+Route::get('/getuserbyid/{id}',[LoginRegistController::class,'getuserbyid']);
 Route::get('/deluser/{id}',[LoginRegistController::class,'delUser']);
+Route::get('/getactnbr/{id}',[ProgramController::class,'getActNbrByUser']);
+Route::get('/getprogramprogres/{id}',[ProgramController::class,'getProgrammeProgress']);
+Route::get('/getprogramgroupuser/{id}',[ProgramController::class,'getprogrammeByUser']);
+Route::get('/valideactivite/{id}',[ProgramController::class,'validActivite']);
+
 Route::get('/getactivites',[ProgramController::class,'getactivite']);
 Route::get('/getroles',[RoleController::class,'getrole']);
 Route::get('/getweek',[ProgramController::class,'getweek']);
 Route::get('/getallusers',[LoginRegistController::class,'getAllUser']);
 Route::get('/getallprogramme',[ProgramController::class,'getAllTitreprogramme']);
-Route::get('/getactnbr/{id}',[ProgramController::class,'getActNbrByUser']);
-Route::get('/getprogramprogres/{id}',[ProgramController::class,'getProgrammeProgress']);
-Route::get('/getprogramgroupuser/{id}',[ProgramController::class,'getprogrammeByUser']);
 Route::get('/getactualprogram',[ProgramController::class,'getprogramme']);
+Route::get('/getdaylyprogramprogress',[ProgramController::class,'getdaylyprogrammeprogresss']);

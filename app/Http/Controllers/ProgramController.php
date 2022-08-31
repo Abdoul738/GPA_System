@@ -78,6 +78,28 @@ class ProgramController extends Controller
         return response()->json($nbr2,200);
     }
 
+    public function getdaylyprogrammeprogresss(){
+        $titreprogrammes = DB::table('titreprogrammes')->orderBy('id','DESC')->first();
+        if($titreprogrammes != null){
+            $nbr = DB::table('programmes')->where('titre_id',$titreprogrammes->id)->count();
+            $nbr1 = DB::table('programmes')
+            ->groupBy('user_id')
+            ->where([['titre_id', $titreprogrammes->id],['statut',1],])
+            ->count();
+            // $nbr2 = round(($nbr1*100)/$nbr,2);
+            return response()->json($nbr1,200);
+        }
+        else{
+            return response()->json(0,200);
+        }
+
+    }
+
+    public function validActivite($id){
+        $program = Programme::where('id',$id)->update(['statut' => 1]);
+        return response()->json($program,200);
+    }
+
     public function getprogrammeByUser($id){
         $programmes = DB::table('programmes')->where('titre_id',$id)->get();
         return response()->json($programmes,200);
