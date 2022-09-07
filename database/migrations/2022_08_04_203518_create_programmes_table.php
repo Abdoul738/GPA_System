@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProgrammeTable extends Migration
+class CreateProgrammesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -18,7 +18,7 @@ class CreateProgrammeTable extends Migration
             $table->unsignedBigInteger('titre_id');
             $table->foreign('titre_id')
                 ->references('id')
-                ->on('titre_programmes')
+                ->on('titreprogrammes')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
             $table->unsignedBigInteger('user_id');

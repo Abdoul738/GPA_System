@@ -36,15 +36,22 @@ Route::post('/createrole',[RoleController::class,'createRole']);
 Route::post('/createactivite',[ProgramController::class,'createactivite']);
 Route::post('/createtitreprogramme',[ProgramController::class,'createtitreprogramme']);
 Route::post('/createprogramme',[ProgramController::class,'createprogramme']);
+Route::post('/addrapport',[ProgramController::class,'addrapport']);
+
 Route::post('/updateuser',[LoginRegistController::class,'updateUser']);
+Route::post('/updaterapport',[ProgramController::class,'updaterapport']);
 
 Route::get('/getuserbyemail/{email}',[LoginRegistController::class,'getUser']);
 Route::get('/getuserbyid/{id}',[LoginRegistController::class,'getuserbyid']);
-Route::get('/deluser/{id}',[LoginRegistController::class,'delUser']);
 Route::get('/getactnbr/{id}',[ProgramController::class,'getActNbrByUser']);
 Route::get('/getprogramprogres/{id}',[ProgramController::class,'getProgrammeProgress']);
 Route::get('/getprogramgroupuser/{id}',[ProgramController::class,'getprogrammeByUser']);
 Route::get('/valideactivite/{id}',[ProgramController::class,'validActivite']);
+Route::get('/getprogramactbyid/{id}',[ProgramController::class,'getprogramactbyid']);
+Route::get('/getrapportbyid/{id}',[ProgramController::class,'getrapportbyid']);
+
+Route::get('/deluser/{id}',[LoginRegistController::class,'delUser']);
+Route::get('/delrapport/{id}',[ProgramController::class,'delrapport']);
 
 Route::get('/getactivites',[ProgramController::class,'getactivite']);
 Route::get('/getroles',[RoleController::class,'getrole']);
@@ -53,3 +60,7 @@ Route::get('/getallusers',[LoginRegistController::class,'getAllUser']);
 Route::get('/getallprogramme',[ProgramController::class,'getAllTitreprogramme']);
 Route::get('/getactualprogram',[ProgramController::class,'getprogramme']);
 Route::get('/getdaylyprogramprogress',[ProgramController::class,'getdaylyprogrammeprogresss']);
+Route::get('/getallweekdays',[ProgramController::class,'getallWeekDays']);
+Route::get('/getactualweekdatas',[ProgramController::class,'getactualweekdatas']);
+Route::get('/getlastweekdatas',[ProgramController::class,'getlastweekdatas']);
+Route::get('/getrapport',[ProgramController::class,'getrapport']);

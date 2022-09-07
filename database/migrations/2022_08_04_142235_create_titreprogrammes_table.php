@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class TitreProgrammesTable extends Migration
+class CreateTitreprogrammesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -16,7 +16,7 @@ class TitreProgrammesTable extends Migration
         Schema::create('titreprogrammes', function (Blueprint $table) {
             $table->id();
             $table->string('titreprogramme');
-            $table->Number('progress');
+            $table->double('progress');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ class TitreProgrammesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('titre_programmes');
+        Schema::dropIfExists('titreprogrammes');
     }
 }
