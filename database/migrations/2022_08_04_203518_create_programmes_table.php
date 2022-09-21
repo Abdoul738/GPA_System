@@ -35,6 +35,8 @@ class CreateProgrammesTable extends Migration
                 ->onUpdate('restrict');
             $table->date('date');
             $table->boolean('statut')->default(false);
+            $table->boolean('halfstatut')->default(false);
+            $table->boolean('activite_sup')->default(false);
             $table->timestamps();
         });
     }

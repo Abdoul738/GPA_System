@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateExecutionjoursTable extends Migration
+class CreateBesoinsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,18 @@ class CreateExecutionjoursTable extends Migration
      */
     public function up()
     {
-        Schema::create('executionjours', function (Blueprint $table) {
+        Schema::create('besoins', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('titreprogramme_id');
-            $table->foreign('titreprogramme_id')
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')
                 ->references('id')
-                ->on('titreprogrammes')
+                ->on('users')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
-            $table->Double('taux');;
+            $table->string('body');
+            $table->boolean('validstatut')->default(false);
+            $table->boolean('rejetstatut')->default(false);
+            $table->boolean('executstatut')->default(false);
             $table->timestamps();
         });
     }
@@ -33,6 +36,6 @@ class CreateExecutionjoursTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('executionjours');
+        Schema::dropIfExists('besoins');
     }
 }

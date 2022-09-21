@@ -9,7 +9,7 @@ use App\Models\Activite;
 use App\Models\Titreprogramme;
 use App\Models\Executionjours;
 use App\Models\Rapportsjours;
-use App\Models\Rapports;
+use App\Models\besoins;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
@@ -49,20 +49,16 @@ class ProgramController extends Controller
         return response()->json($programme,200);
     }
 
-    public function getprogramme(){
-        $titreprogrammes = DB::table('titreprogrammes')->orderBy('id','DESC')->first();
-        if($titreprogrammes != null){
-            // $programmes = DB::table('programmes')->where('titre_id',$titreprogrammes->id)->orderBy('user_id')->get();
-            // return response()->json($programmes,200);
-
-            $programmes = Programme::join('users', 'users.id', '=', 'programmes.user_id')
-                                    ->join('activites', 'activites.id', '=', 'programmes.activite_id')
-                                    ->where('titre_id',$titreprogrammes->id)
-                                    ->orderBy('user_id')
-                                    ->get(['programmes.*','users.nom','users.prenom','activites.libelleactivite']);
+    public function getprogramme($id){
+        $programmes = Programme::join('users', 'users.id', '=', 'programmes.user_id')
+                                ->join('activites', 'activites.id', '=', 'programmes.activite_id')
+                                ->join('titreprogrammes', 'titreprogrammes.id', '=', 'programmes.titre_id')
+                                ->where('titre_id',$id)
+                                ->orderBy('user_id')
+                                ->get(['programmes.*','users.nom','users.prenom','activites.libelleactivite','titreprogrammes.titreprogramme']);
+        if($programmes != null){
             return response()->json($programmes,200);
-        }
-        else{
+        }else{
             return response()->json(0,200);
         }
 
@@ -83,7 +79,14 @@ class ProgramController extends Controller
                 ['statut',1],
             ]
         )->count();
-        $nbr2 = round(($nbr1*100)/$nbr,2);
+        $nbr3 = DB::table('programmes')->where(
+            [
+                ['titre_id', $id],
+                ['halfstatut',1],
+            ]
+        )->count();
+        $nbr0 = $nbr3/2;
+        $nbr2 = round((($nbr1+$nbr0)*100)/$nbr,2);
         $progressupdate = Titreprogramme::where('id',$id)->update(['progress' => $nbr2]);
         return response()->json($nbr2,200);
     }
@@ -113,9 +116,12 @@ class ProgramController extends Controller
             $nbr = DB::table('programmes')->where('titre_id',$titreprogrammes->id)->count();
             $nbr1 = DB::table('programmes')
             ->where([['titre_id', $titreprogrammes->id],['statut',1],['updated_at',$datejrs],])
-            // ->where([['titre_id', $titreprogrammes->id],['statut',1]])
             ->count();
-            $taux = round(($nbr1*100)/$nbr,2);
+            $nbr3 = DB::table('programmes')
+            ->where([['titre_id', $titreprogrammes->id],['halfstatut',1],['updated_at',$datejrs],])
+            ->count();
+            $nbr0 = $nbr3/2;
+            $taux = round((($nbr1+$nbr0)*100)/$nbr,2);
             // END CALCUL TAUX
             if($taux != null){
                 // START UPDATE TAUX IN DATA BASE
@@ -196,6 +202,11 @@ class ProgramController extends Controller
         return response()->json($program,200);
     }
 
+    public function validhalfActivite($id){
+        $program = Programme::where('id',$id)->update(['halfstatut' => 1]);
+        return response()->json($program,200);
+    }
+
     public function getprogrammeByUser($id){
         $programmes = DB::table('programmes')->where('titre_id',$id)->get();
         return response()->json($programmes,200);
@@ -253,7 +264,7 @@ class ProgramController extends Controller
     }
 
     public function getAllTitreprogramme(){
-        $ttitreprogrammes = DB::table('titreprogrammes')->get();
+        $ttitreprogrammes = DB::table('titreprogrammes')->orderBy('id','DESC')->get();
         return response()->json($ttitreprogrammes,200);
     }
 /*********************** END GESTION DES TITRES DE PROGRAMMES *******************/
@@ -265,7 +276,11 @@ class ProgramController extends Controller
     }
 
     public function getrapport(){
-        $rap = DB::table('rapportsjours')->get();
+        $rap = Rapportsjours::join('users', 'users.id', '=', 'rapportsjours.usr_id')
+                            ->join('programmes', 'programmes.id', '=', 'rapportsjours.prog_id')
+                            ->join('activites', 'activites.id', '=', 'programmes.activite_id')
+                            ->orderBy('id','DESC')
+                            ->get(['rapportsjours.*','users.nom','users.prenom','activites.libelleactivite']);
         return response()->json($rap,200);
     }
 
@@ -283,4 +298,37 @@ class ProgramController extends Controller
         return Rapportsjours::destroy($id);
     }
 /*********************** END GESTION DES RAPPORTS D'ACTIVITES *******************/
+
+/*********************** START GESTION DES BESOINS *******************/
+    public function addbesoins(Request $req){
+        $rap= besoins::create($req->all());
+        return response()->json($rap,200);
+    }
+
+    public function getbesoins(){
+        $rap = besoins::join('users', 'users.id', '=', 'besoins.user_id')
+                        ->orderBy('id','DESC')
+                        ->get(['besoins.*','users.nom','users.prenom']);
+        return response()->json($rap,200);
+    }
+
+    public function validbesoins(Request $req){
+        $rap=besoins::where('id',$req->id)->update(['validstatut' => 1]);
+        return response()->json($rap);
+    }
+
+    public function rejetbesoins(Request $req){
+        $rap=besoins::where('id',$req->id)->update(['rejetstatut' => 1]);
+        return response()->json($rap);
+    }
+
+    public function executbesoins(Request $req){
+        $rap=besoins::where('id',$req->id)->update(['executstatut' => 1]);
+        return response()->json($rap);
+    }
+
+    public function delbesoin($id){
+        return besoins::destroy($id);
+    }
+/*********************** END GESTION DES BESOINS *******************/
 }
