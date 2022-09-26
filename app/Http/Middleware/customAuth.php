@@ -18,11 +18,11 @@ class customAuth
 public function handle($request, Closure $next)
 {
 $path = $request->path();
-if($path=="logins" && Session::get('user')){
+if($path=="login" && Session::get('user')){
 return redirect('/');
 }
-else if(($path!="logins" && !Session::get('user')) && ($path!="register" && !Session::get('user'))){
-return redirect('/logins');
+else if(($path!="login" && !Session::get('user')) && ($path!="register" && !Session::get('user'))){
+return redirect('/login');
 }
 return $next($request);
 }

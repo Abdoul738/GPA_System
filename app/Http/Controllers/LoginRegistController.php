@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Validator;
 
 class LoginRegistController extends Controller
 {
+    
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    }
     //Creation d'un utilisateur
     public function registerUser(Request $req){
 
@@ -32,7 +37,7 @@ class LoginRegistController extends Controller
             'email'     => 'required|email|unique:users',
             'password'  => 'required|min:4|confirmed',
         ]);        
-        return $request->all();
+        // return $request->all();
         if ($validate->fails()){
             return response()->json([
                 'status' => 'error',
@@ -73,6 +78,8 @@ class LoginRegistController extends Controller
         if (! $token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+        $user = Auth::user();
+        $token = $user->createToken('');
 
         return $this->respondWithToken($token, $request->email);
     }
@@ -84,7 +91,7 @@ class LoginRegistController extends Controller
         $user = User::where([['email', $email]])
             ->join('roles', 'users.role_id', '=', 'roles.id')
             ->first(['users.*', 'roles.libellerole', 'roles.niveau']);
-
+            
             return response()->json([
                 'access_token' => $token,
                 'token_type' => 'bearer',

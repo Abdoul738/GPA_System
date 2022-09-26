@@ -30,7 +30,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('login', [LoginRegistController::class,'login']);
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
-    Route::post('register', 'LoginRegistController@register'); 
+    Route::post('register',  [LoginRegistController::class,'register']); 
 
 });
 
@@ -82,5 +82,3 @@ Route::get('/getactualweekdatas',[ProgramController::class,'getactualweekdatas']
 Route::get('/getlastweekdatas',[ProgramController::class,'getlastweekdatas']);
 Route::get('/getrapport',[ProgramController::class,'getrapport']);
 Route::get('/getbesoins',[ProgramController::class,'getbesoins']);
-
-
