@@ -21,8 +21,7 @@ class CreateExecutionjoursTable extends Migration
                 ->on('titreprogrammes')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
-            $table->Double('taux');
-            $table->date('date_execute');
+            $table->Double('taux');;
             $table->timestamps();
         });
     }

@@ -27,6 +27,7 @@ class CreateUsersTable extends Migration
                 ->onUpdate('restrict');
             $table->string('numero');
             $table->string('password')->nullable();
+            $table->boolean('statut')->default(true);
             $table->rememberToken()->nullable();
             $table->timestamps();
         });

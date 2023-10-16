@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\User;
+use App\Notifications\UserNotification;
+use Illuminate\Support\Facades\Hash;
 
 class LoginRegistController extends Controller
 {
@@ -13,10 +15,24 @@ class LoginRegistController extends Controller
     public function registerUser(Request $req){
 
         $result = DB::table('users')->where([['email', $req->email],])->get();
-
         $res = json_decode($result,true);
         if(sizeof($res) === 0){
-            $user= User::create($req->all());
+            // $user= User::create($req->all());
+            $password = bin2hex(random_bytes(4));
+            $user = User::create([
+                'nom' => $req->nom,
+                'prenom' => $req->prenom,
+                'email' => $req->email,
+                'role_id' => $req->role_id,
+                'numero' => $req->numero,
+                'statut' => $req->statut,
+                'password' => Hash::make($password),
+            ]);
+            try {
+            $user->notify(new UserNotification($user, $password));
+            } catch (\Throwable $th) {
+                throw $th;
+            }
             return response()->json($user,200);
         }
         else{
@@ -26,25 +42,33 @@ class LoginRegistController extends Controller
 
     //Connexion
     function login(Request $req){
-
-        $result = DB::table('users')->where([
-
-              ['email', $req->email],
-              ['password',$req->password],
-
-                        ])->get();
-
+        $result = User::where([['email', $req->email]])
+        ->join('roles', 'users.role_id', '=', 'roles.id')
+        ->get(['users.*', 'roles.libellerole', 'roles.niveau']);
+        
         $res = json_decode($result,true);
-        return response()->json(sizeof($res));
         if(sizeof($res) === 0){
-        return response()->json(sizeof($res));
+            return response()->json(sizeof($res));
         }
         else{
-            if($result[0]->password === $req->password){
-            $user=DB::table('users')->where('id',$result[0]->id)->get();
-            return response()->json($result[0]->id);
+            if (Hash::check($req->password, $result[0]->password)) {
+                return response()->json($result[0]);
+            } else {
+                return response()->json(0);
             }
         }
+
+        // $user = User::where('email', $req->email)->first();
+
+        // if ($user) {
+        //     if (Hash::check($req->password, $user->password)) {
+        //         return response()->json($user);
+        //     } else {
+        //         return response()->json(0);
+        //     }
+        // } else {
+        //     return null;
+        // }
     }
 
     //Retrouver un utilisateur par email
@@ -62,18 +86,11 @@ class LoginRegistController extends Controller
 
     //Liste des utilisateurs
     public function getAllUser(){
-        $data = DB::table('users')->get();
-        // return response()->json($data,200);
 
         $users = User::join('roles', 'users.role_id', '=', 'roles.id')
-            ->get(['users.*', 'roles.libellerole']);
+            ->get(['users.*', 'roles.libellerole', 'roles.niveau']);
         return response()->json($users,200);
-
-        // $users = User::join('roles', 'users.role_id', '=', 'roles.id')
-        //     ->where('users.status', 'active')
-        //     ->where('posts.status','active')
-        //     ->get(['users.*', 'roles.libellerole']);
-      }
+    }
 
     //Modifier Profile
     public function UpdateProfile(){
@@ -86,18 +103,18 @@ class LoginRegistController extends Controller
     }
 
     public function updateUser(Request $req){
-        $user=User::where('id',$req->id)
+        $user=User::where('id',$req->user_id)
         ->update(
             [ 
                 'nom' => $req->nom,
                 'prenom' => $req->prenom,
                 'email' => $req->email,
-                'role_id' => $req->role_id,
+                // 'role_id' => $req->role_id,
                 'numero' => $req->numero
             ]
         );
-
-        return response()->json($user);
+        $result=User::where('id',$req->user_id)->first();
+        return response()->json($result, 200);
     }
 
     public function delUser($id){

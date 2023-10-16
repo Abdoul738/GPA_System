@@ -21,5 +21,7 @@ class Programme extends Model
         'activite_id',
         'date',
         'statut',
+        'halfstatut',
+        'activite_sup',
     ];
 }

@@ -9,9 +9,11 @@ use App\Models\Activite;
 use App\Models\Titreprogramme;
 use App\Models\Executionjours;
 use App\Models\Rapportsjours;
-use App\Models\Rapports;
+use App\Models\besoins;
+use App\Models\Documents;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use Carbon\Carbon;
 
 class ProgramController extends Controller
 {
@@ -37,7 +39,7 @@ class ProgramController extends Controller
     }
 
     public function getActNbrByUser($id){
-        $nbr = DB::table('programmes')->where('user_id',$id)->count();
+        $nbr = Programme::where('user_id',$id)->count();
         return response()->json($nbr,200);
     }
 /*********************** END GESTION DES ACTIVITES *******************/
@@ -49,20 +51,32 @@ class ProgramController extends Controller
         return response()->json($programme,200);
     }
 
-    public function getprogramme(){
-        $titreprogrammes = DB::table('titreprogrammes')->orderBy('id','DESC')->first();
-        if($titreprogrammes != null){
-            // $programmes = DB::table('programmes')->where('titre_id',$titreprogrammes->id)->orderBy('user_id')->get();
-            // return response()->json($programmes,200);
-
-            $programmes = Programme::join('users', 'users.id', '=', 'programmes.user_id')
-                                    ->join('activites', 'activites.id', '=', 'programmes.activite_id')
-                                    ->where('titre_id',$titreprogrammes->id)
-                                    ->orderBy('user_id')
-                                    ->get(['programmes.*','users.nom','users.prenom','activites.libelleactivite']);
+    public function getprogramme($id){
+        $programmes = Programme::join('users', 'users.id', '=', 'programmes.user_id')
+                                ->join('activites', 'activites.id', '=', 'programmes.activite_id')
+                                ->join('titreprogrammes', 'titreprogrammes.id', '=', 'programmes.titre_id')
+                                ->where('titre_id',$id)
+                                ->orderBy('user_id')
+                                ->get(['programmes.*','users.nom','users.prenom','activites.libelleactivite','titreprogrammes.titreprogramme']);
+        if($programmes != null){
             return response()->json($programmes,200);
+        }else{
+            return response()->json(0,200);
         }
-        else{
+
+    }
+
+    public function getUserprogramme(){
+        $titreprogrammes = Titreprogramme::orderBy('id','DESC')->first();
+        $programmes = Programme::join('users', 'users.id', '=', 'programmes.user_id')
+                                ->join('activites', 'activites.id', '=', 'programmes.activite_id')
+                                ->join('titreprogrammes', 'titreprogrammes.id', '=', 'programmes.titre_id')
+                                ->where('titre_id',$titreprogrammes->id)
+                                ->orderBy('user_id')
+                                ->get(['programmes.*','users.nom','users.prenom','activites.libelleactivite','titreprogrammes.titreprogramme']);
+        if($programmes != null){
+            return response()->json($programmes,200);
+        }else{
             return response()->json(0,200);
         }
 
@@ -76,15 +90,23 @@ class ProgramController extends Controller
     }
 
     public function getProgrammeProgress($id){
-        $nbr = DB::table('programmes')->where('titre_id',$id)->count();
-        $nbr1 = DB::table('programmes')->where(
-            [
-                ['titre_id', $id],
-                ['statut',1],
-            ]
-        )->count();
-        $nbr2 = round(($nbr1*100)/$nbr,2);
+        $nbr = Programme::where('titre_id',$id)->count();
+        $nbr1 = Programme::where('titre_id', $id)->where('statut',1)->count();
+        $nbr3 = Programme::where('titre_id', $id)->where('halfstatut',1)->count();
+        $nbr0 = $nbr3/2;
+        $nbr2 = round((($nbr1+$nbr0)*100)/$nbr,2);
         $progressupdate = Titreprogramme::where('id',$id)->update(['progress' => $nbr2]);
+        return response()->json($nbr2,200);
+    }
+
+    public function getActualProgrammeProgress(){
+        $titreprogrammes = Titreprogramme::orderBy('id','DESC')->first();
+        $nbr = Programme::where('titre_id',$titreprogrammes->id)->count();
+        $nbr1 = Programme::where('titre_id', $titreprogrammes->id)->where('statut',1)->count();
+        $nbr3 = Programme::where('titre_id', $titreprogrammes->id)->where('halfstatut',1)->count();
+        $nbr0 = $nbr3/2;
+        $nbr2 = round((($nbr1+$nbr0)*100)/$nbr,2);
+        $progressupdate = Titreprogramme::where('id',$titreprogrammes->id)->update(['progress' => $nbr2]);
         return response()->json($nbr2,200);
     }
 
@@ -107,19 +129,18 @@ class ProgramController extends Controller
 
     public function getdaylyprogrammeprogresss(){
         $datejrs = date('Y-m-d');
-        $titreprogrammes = DB::table('titreprogrammes')->orderBy('id','DESC')->first();
+        $titreprogrammes = Titreprogramme::orderBy('id','DESC')->first();
         if($titreprogrammes != null){
             // START CALCUL TAUX
-            $nbr = DB::table('programmes')->where('titre_id',$titreprogrammes->id)->count();
-            $nbr1 = DB::table('programmes')
-            ->where([['titre_id', $titreprogrammes->id],['statut',1],['updated_at',$datejrs],])
-            // ->where([['titre_id', $titreprogrammes->id],['statut',1]])
-            ->count();
-            $taux = round(($nbr1*100)/$nbr,2);
+            $nbr = Programme::where('titre_id',$titreprogrammes->id)->count();
+            $nbr1 = Programme::where('titre_id', $titreprogrammes->id)->where('statut',1)->whereDate('updated_at',$datejrs)->count();
+            $nbr3 = Programme::where('titre_id', $titreprogrammes->id)->where('halfstatut',1)->whereDate('updated_at',$datejrs)->count();
+            $nbr0 = $nbr3/2;
+            $taux = round((($nbr1+$nbr0)*100)/$nbr,2);
             // END CALCUL TAUX
             if($taux != null){
                 // START UPDATE TAUX IN DATA BASE
-                $verif_taux = DB::table('executionjours')->where('created_at',$datejrs)->get();
+                $verif_taux = Executionjours::whereDate('created_at',$datejrs)->get();
                 $res = json_decode($verif_taux,true);
 
                 if(sizeof($res) === 0)
@@ -150,45 +171,57 @@ class ProgramController extends Controller
     }
 
     public function getactualweekdatas(){
-        $titreprogrammes = DB::table('titreprogrammes')->orderBy('id','DESC')->first();
-        if($titreprogrammes != null){
-            $datas0 = DB::table('executionjours')->where('titreprogramme_id',$titreprogrammes->id)->get();
-            $nbr = DB::table('executionjours')->where('titreprogramme_id',$titreprogrammes->id)->count();
-            $res = json_decode($datas0,true);
-            if(sizeof($res) === 0){
-                return response()->json(0,200);
-            }else{
-                for($d = 0; $d < $nbr; $d++) {
-                    $datas[] = $datas0[$d]->taux;
+        $annee = date("Y");
+        $no_semaine = date("W");
+        $numb = date("w");
+        
+        for($i = 1; $i <= 365; $i++) {
+            $week = date("W", mktime(0, 0, 0, 1, $i, $annee));
+            if($week == $no_semaine) {
+                for($d = 0; $d < 7; $d++) {
+                    $nbr2[$d] = date("Y-m-d", mktime(0, 0, 0, 1, $i+$d, $annee));
                 }
-                return response()->json($datas,200);
-            }        
+                if($numb == 0){
+                    $numb = 7;
+                }
+                for($x = 0; $x < $numb; $x++) {
+                    $datas0 = Executionjours::whereDate('updated_at',$nbr2[$x])->get('taux');
+                    $res = json_decode($datas0,true);
+                    if(sizeof($res) === 0){
+                        $datas[$x] = 0;
+                    }else{
+                        $datas[$x] = $datas0[0]->taux;
+                    }
+                }
+                break;
+            }
         }
-        else{
-            return response()->json(0,200);
-        }
-
+        return response()->json($datas,200);
     }
 
     public function getlastweekdatas(){
-        $titreprogrammes = DB::table('titreprogrammes')->orderBy('id','DESC')->first();
-        if($titreprogrammes != null){
-            $p_id = $titreprogrammes->id-1;
-            $datas0 = DB::table('executionjours')->where('titreprogramme_id',$p_id)->get();
-            $nbr = DB::table('executionjours')->where('titreprogramme_id',$p_id)->count();
-            $res = json_decode($datas0,true);
-            if(sizeof($res) === 0){
-                return response()->json(0,200);
-            }else{
-                for($d = 0; $d < $nbr; $d++) {
-                    $datas[] = $datas0[$d]->taux;
+        $annee = date("Y");
+        $no_semaine = date("W")-1;
+        for($i = 1; $i <= 365; $i++) {
+            $week = date("W", mktime(0, 0, 0, 1, $i, $annee));
+            if($week == $no_semaine) {
+                for($d = 0; $d < 7; $d++) {
+                    $nbr2[$d] = date("Y-m-d", mktime(0, 0, 0, 1, $i+$d, $annee));
                 }
-                return response()->json($datas,200);
-            }        }
-        else{
-            return response()->json(0,200);
-        }
 
+                for($x = 0; $x < 7; $x++) {
+                    $datas0 = Executionjours::whereDate('updated_at',$nbr2[$x])->get('taux');
+                    $res = json_decode($datas0,true);
+                    if(sizeof($res) === 0){
+                        $datas[$x] = 0;
+                    }else{
+                        $datas[$x] = $datas0[0]->taux;
+                    }
+                }
+                break;
+            }
+        }
+        return response()->json($datas,200);
     }
 
     public function validActivite($id){
@@ -196,8 +229,18 @@ class ProgramController extends Controller
         return response()->json($program,200);
     }
 
+    public function validhalfActivite($id){
+        $program = Programme::where('id',$id)->update(['halfstatut' => 1]);
+        return response()->json($program,200);
+    }
+
     public function getprogrammeByUser($id){
-        $programmes = DB::table('programmes')->where('titre_id',$id)->get();
+        $programmes = Programme::where('titre_id',$id)->get();
+        return response()->json($programmes,200);
+    }
+
+    public function getAllprogramme(){
+        $programmes = Titreprogramme::orderBy('id', 'DESC')->get();
         return response()->json($programmes,200);
     }
 /*********************** END GESTION DES PROGRAMMES *******************/
@@ -238,7 +281,7 @@ class ProgramController extends Controller
     public function createtitreprogramme(Request $req){
         $error=0;
         $titre_id = 0;
-        $verif_programme = DB::table('titreprogrammes')->where('titreprogramme',$req->titreprogramme)->get();
+        $verif_programme = Titreprogramme::where('titreprogramme',$req->titreprogramme)->get();
         $res = json_decode($verif_programme,true);
 
         if(sizeof($res) === 0)
@@ -253,7 +296,7 @@ class ProgramController extends Controller
     }
 
     public function getAllTitreprogramme(){
-        $ttitreprogrammes = DB::table('titreprogrammes')->get();
+        $ttitreprogrammes = Titreprogramme::orderBy('id','DESC')->get();
         return response()->json($ttitreprogrammes,200);
     }
 /*********************** END GESTION DES TITRES DE PROGRAMMES *******************/
@@ -265,7 +308,11 @@ class ProgramController extends Controller
     }
 
     public function getrapport(){
-        $rap = DB::table('rapportsjours')->get();
+        $rap = Rapportsjours::join('users', 'users.id', '=', 'rapportsjours.usr_id')
+                            ->join('programmes', 'programmes.id', '=', 'rapportsjours.prog_id')
+                            ->join('activites', 'activites.id', '=', 'programmes.activite_id')
+                            ->orderBy('id','DESC')
+                            ->get(['rapportsjours.*','users.nom','users.prenom','activites.libelleactivite']);
         return response()->json($rap,200);
     }
 
@@ -283,4 +330,55 @@ class ProgramController extends Controller
         return Rapportsjours::destroy($id);
     }
 /*********************** END GESTION DES RAPPORTS D'ACTIVITES *******************/
+
+/*********************** START GESTION DES BESOINS *******************/
+    public function addbesoins(Request $req){
+        $rap= besoins::create($req->all());
+        return response()->json($rap,200);
+    }
+
+    public function getbesoins(){
+        $rap = besoins::join('users', 'users.id', '=', 'besoins.user_id')
+                        ->orderBy('id','DESC')
+                        ->get(['besoins.*','users.nom','users.prenom']);
+        return response()->json($rap,200);
+    }
+
+    public function validbesoins($id){
+        $rap=besoins::where('id',$id)->update(['validstatut' => 1]);
+        return response()->json($rap);
+    }
+
+    public function rejetbesoins($id){
+        $rap=besoins::where('id',$id)->update(['rejetstatut' => 1]);
+        return response()->json($rap);
+    }
+
+    public function executbesoins(Request $req){
+        $rap=besoins::where('id',$req->id)->update(['executstatut' => 1]);
+        return response()->json($rap);
+    }
+
+    public function delbesoin($id){
+        return besoins::destroy($id);
+    }
+/*********************** END GESTION DES BESOINS *******************/
+
+/*********************** START GESTION DES DOCUMENTS *******************/
+    public function adddocs(Request $req){
+        $rap= Documents::create($req->all());
+        return response()->json($rap,200);
+    }
+
+    public function getdocs(){
+        $rap = Documents::join('users', 'users.id', '=', 'documents.createdBy')
+                        ->orderBy('id','DESC')
+                        ->get(['documents.*','users.nom','users.prenom']);
+        return response()->json($rap,200);
+    }
+
+    public function deldocs($id){
+        return besoins::destroy($id);
+    }
 }
+/*********************** END GESTION DES DOCUMENTS *******************/
