@@ -51,6 +51,34 @@ class ProgramController extends Controller
         return response()->json($programme,200);
     }
 
+    public function updateprogramme(Request $req){
+        $verif_activite = DB::table('activites')->where('libelleactivite',$req->activite_id)->get();
+        $res = json_decode($verif_activite,true);
+        if(sizeof($res) === 0)
+        {
+        $activite= Activite::create([
+            'libelleactivite' => $req->activite_id,
+            ]
+        );
+        $activite_id = $activite->id;
+        }
+        else
+        {
+            $activite_id = $verif_activite[0]->id;
+        }
+
+        // dd($req);
+        $program = Programme::where('id',$req->id)->update(
+            [
+                'user_id' => $req->userid,
+                'activite_id' => $activite_id,
+                'date' => $req->date,
+            ]
+        );
+        $programmes = Programme::where('id',$req->id)->first();
+        return response()->json($programmes,200);
+    }
+
     public function getprogramme($id){
         $programmes = Programme::join('users', 'users.id', '=', 'programmes.user_id')
                                 ->join('activites', 'activites.id', '=', 'programmes.activite_id')
@@ -86,7 +114,7 @@ class ProgramController extends Controller
         $programmes = Programme::where('programmes.id',$id)
                                 ->join('activites', 'activites.id', '=', 'programmes.activite_id')
                                 ->get(['programmes.*','activites.libelleactivite']);
-        return response()->json($programmes,200);
+        return response()->json($programmes[0],200);
     }
 
     public function getProgrammeProgress($id){
@@ -242,6 +270,12 @@ class ProgramController extends Controller
     public function getAllprogramme(){
         $programmes = Titreprogramme::orderBy('id', 'DESC')->get();
         return response()->json($programmes,200);
+    }
+
+    public function delprogramme($id){
+        $titre_id = Programme::where('id',$id)->get('titre_id');
+        Programme::destroy($id);
+        return response()->json($titre_id[0],200);
     }
 /*********************** END GESTION DES PROGRAMMES *******************/
 

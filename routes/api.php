@@ -42,6 +42,8 @@ Route::post('/addbesoins',[ProgramController::class,'addbesoins']);
 Route::post('/updateuser',[LoginRegistController::class,'updateUser']);
 Route::post('/updaterapport',[ProgramController::class,'updaterapport']);
 Route::post('/executbesoins',[ProgramController::class,'executbesoins']);
+Route::post('/updateprogramme',[ProgramController::class,'updateprogramme']);
+Route::post('/updateprofile',[LoginRegistController::class,'UpdateProfile']);
 
 Route::get('/getuserbyemail/{email}',[LoginRegistController::class,'getUser']);
 Route::get('/getuserbyid/{id}',[LoginRegistController::class,'getuserbyid']);
@@ -59,6 +61,7 @@ Route::get('/rejetbesoins/{id}',[ProgramController::class,'rejetbesoins']);
 Route::get('/deluser/{id}',[LoginRegistController::class,'delUser']);
 Route::get('/delrapport/{id}',[ProgramController::class,'delrapport']);
 Route::get('/delbesoin/{id}',[ProgramController::class,'delbesoin']);
+Route::get('/delprogramme/{id}',[ProgramController::class,'delprogramme']);
 
 Route::get('/getactivites',[ProgramController::class,'getactivite']);
 Route::get('/getroles',[RoleController::class,'getrole']);

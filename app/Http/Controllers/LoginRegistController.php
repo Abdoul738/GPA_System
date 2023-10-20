@@ -73,14 +73,14 @@ class LoginRegistController extends Controller
 
     //Retrouver un utilisateur par email
     public function getUser($email){
-        $data = DB::table('users')->where('email',$email)->get();
+        $data = User::where('email',$email)->first();
         //$data= User::all();
         return response()->json($data);
       }
 
     public function getuserbyid($id)
     {
-        $user= DB::table('users')->where('id',$id)->get();
+        $user= User::where('id',$id)->first();
         return response()->json($user);
     }
 
@@ -93,8 +93,19 @@ class LoginRegistController extends Controller
     }
 
     //Modifier Profile
-    public function UpdateProfile(){
+    public function UpdateProfile(Request $req){
 
+        $user = User::where('id',$req->id)->update(
+            [
+                'nom' => $req->nom,
+                'prenom' => $req->prenom,
+                'email' => $req->email,
+                'role_id' => $req->role_id,
+                'numero' => $req->numero,
+            ]
+        );
+        $result=User::where('id',$req->id)->first();
+        return response()->json($result, 200);
     }
 
     //Recuperer Mot de passe
